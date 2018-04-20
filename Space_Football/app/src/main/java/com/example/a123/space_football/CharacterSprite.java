@@ -1,3 +1,4 @@
+
 package com.example.a123.space_football;
 
 import android.content.res.Resources;
@@ -10,11 +11,14 @@ import java.util.Random;
 public class CharacterSprite {
     public Bitmap image;
     public int x,y;
-    private int xVelocity = 10;
+    private int xVelocity = 5;
     private int yVelocity = 5;
     private int screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
     private int screenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
-    boolean goal;
+    private  boolean collision;
+    public boolean goal1, goal2;
+    private Rect ball;
+    int movingVectorX=0, movingVectorY=0;
 
     public CharacterSprite(Bitmap bmp) {
         image = bmp;
@@ -25,34 +29,51 @@ public class CharacterSprite {
         canvas.drawBitmap(image, x, y, null);
     }
 
-    public  void  update(Rect hero1, Rect hero2)
+    public  void  update(Rect hero)
     {
-        if (hero1.left < x + image.getWidth() &&
-                hero1.left + hero1.width() > x &&
-                hero1.top < y + image.getHeight() &&
-                hero1.height() + hero1.top > y) {
-            xVelocity = xVelocity * -1;// collision detected!
+        ball = new Rect(x/1,y/1, x+image.getWidth(), y+image.getHeight());
+
+        x = x + xVelocity/20;
+        y = y + yVelocity/20;
+
+        if (hero.left < x + image.getWidth() &&
+                hero.left + hero.width() > x &&
+                hero.top < y + image.getHeight() &&
+                hero.height() + hero.top > y) {
+
+            xVelocity = xVelocity * -1;
             yVelocity = yVelocity * -1;
+            collision=true;
         }
 
-        if (hero2.left < x + image.getWidth() &&
-                hero2.left + hero2.width() > x &&
-                hero2.top < y + image.getHeight() &&
-                hero2.height() + hero2.top > y) {
-            xVelocity = xVelocity * -1;// collision detected!
-            yVelocity = yVelocity * -1;
-        }
+        if (collision) {
 
-        x += xVelocity;
-        y += yVelocity;
-        if ((x > screenWidth - image.getWidth()-5) || (x < 5)) {
+            xVelocity = x - hero.left ;
+            yVelocity = y - hero.top ;
+
+            collision=false;
+        }
+        if ((x > screenWidth - image.getWidth() - 5) || (x < 5)) {
             xVelocity = xVelocity * -1;
         }
-        if (((y > screenHeight - image.getHeight()-5) || (y < 5)) && x<screenWidth/2-150 && x>screenWidth/2+150) {
+        if (((y > screenHeight - image.getHeight() - 5) || (y < 5)) && x < screenWidth / 2 - 150 && x > screenWidth / 2 + 150) {
             yVelocity = yVelocity * -1;
         }
-        if (y > screenHeight - image.getHeight()-5 || (y < 5)){
-            goal = true;
+        if (y > screenHeight - image.getHeight() - 5){
+            goal2 = true;
+            collision=false;
+            x=screenWidth/2-image.getWidth()/2;
+            y=screenHeight/2-image.getHeight()/2;
+            xVelocity=0;
+            yVelocity=0;
+        }
+        if (y < 5) {
+            goal1 = true;
+            collision=false;
+            x=screenWidth/2-image.getWidth()/2;
+            y=screenHeight/2-image.getHeight()/2;
+            xVelocity = 0;
+            yVelocity=0;
         }
     }
 }
