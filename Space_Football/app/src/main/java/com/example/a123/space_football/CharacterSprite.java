@@ -1,3 +1,4 @@
+
 package com.example.a123.space_football;
 
 import android.content.res.Resources;
@@ -74,6 +75,5 @@ public class CharacterSprite {
             xVelocity = 0;
             yVelocity=0;
         }
-
     }
 }
