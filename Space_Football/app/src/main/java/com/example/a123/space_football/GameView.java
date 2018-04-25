@@ -25,8 +25,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     int goal1 = 0, goal2 = 0, pointerId1= -1, pointerId2= -1, playerHeight, playerWidth, asteroidHeight, asteroidWidth;
     private final int edge = 10;
     private  boolean b_goal1, b_goal2;
-    private int xVelocity = 5;
-    private int yVelocity = 5;
+    private int xVelocity = 0;
+    private int yVelocity = 0;
+    int n_x=0;
+    int n_y=0;
 
     public GameView(Context context) {
         super(context);
@@ -46,27 +48,20 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
 
-    //инициализация спрайтов
         player1 = new CharacterSprite(BitmapFactory.decodeResource(getResources(), R.drawable.player1));
         player2 = new CharacterSprite(BitmapFactory.decodeResource(getResources(), R.drawable.player2));
         asteroid = new CharacterSprite(BitmapFactory.decodeResource(getResources(), R.drawable.asteroid));
-        //положение белого космонавта при создании 
         player1.x = screenWidth / 2 - player1.image.getWidth() / 2;
         player1.y = 150;
-        //положение красного космотнавта при создании
         player2.x = screenWidth / 2 - player2.image.getWidth() / 2;
         player2.y = screenHeight - player2.image.getHeight() - 150;
-        //положение мячика при создании
         asteroid.x = screenWidth / 2 - asteroid.image.getWidth() / 2;
         asteroid.y = screenHeight / 2 - asteroid.image.getHeight() / 2;
-        //ширина-высота для обоих космонавтов одинаковы
         playerHeight = player1.image.getHeight();
         playerWidth = player1.image.getWidth();
-        //ширина-высота спрайта астероида
         asteroidWidth = asteroid.image.getWidth();
         asteroidHeight = asteroid.image.getHeight();
 
-        //генерируем рандомные координаты для будущих звёздочек
         for (int i = 0; i < 100; i++) {
             x[i] = rand.nextInt(screenWidth);
             y[i] = rand.nextInt(screenHeight);
@@ -80,30 +75,29 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     //@Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        int count = event.getPointerCount();//кол-во касаний на данный момент
-        int maskedAction = event.getActionMasked();//индекс действия, не зависящий от индекс и ID касания
+        int count = event.getPointerCount();
+        int maskedAction = event.getActionMasked();
 
         for (int i = 0; i < count; i++) {
             switch (maskedAction) {
 
-                case MotionEvent.ACTION_DOWN: {//в момент первого...
+                case MotionEvent.ACTION_DOWN: {
                 }
-                case MotionEvent.ACTION_POINTER_DOWN: {//...и всех последующих _нажатий_...
-                //проверка, совершено ли нажатие пальцем с текущим индексом на одного из космонавтов, или нет
+                case MotionEvent.ACTION_POINTER_DOWN: {
+
                     if (pointerIsOnPlayer(i, event, player1) && pointerId1 == -1) {
-                        pointerId1 = event.getPointerId(event.getActionIndex());//если да, то запоминаем индекс этого пальца
+                        pointerId1 = event.getPointerId(event.getActionIndex());
                     }
                     if (pointerIsOnPlayer(i, event, player2) && pointerId2 == -1) {
-                        pointerId2 = event.getPointerId(event.getActionIndex());//если да, то запоминаем индекс этого пальца
+                        pointerId2 = event.getPointerId(event.getActionIndex());
                     }
                 }
 
                 case MotionEvent.ACTION_MOVE: {
-                    if (i == pointerId1) {//если текущее событие движения совершается пальцем, управляющим белым космонавтом
-                        player1.x = (int) event.getX(event.findPointerIndex(pointerId1)) - playerWidth / 2;//координаты космонавта соответсвуют новым координатам пальца на экране
+                    if (i == pointerId1) {
+                        player1.x = (int) event.getX(event.findPointerIndex(pointerId1)) - playerWidth / 2;
                         player1.y = (int) event.getY(event.findPointerIndex(pointerId1)) - playerHeight / 2;
 
-                        //ограничения движения белого космонавта за пределами своей половины экрана
                         if (player1.y > screenHeight / 2 - playerHeight)
                             player1.y = screenHeight / 2 - playerHeight - edge;
                         if (player1.y < edge) player1.y = edge;
@@ -111,7 +105,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                         if (player1.x + playerWidth > screenWidth - edge)
                             player1.x = screenWidth - playerWidth - edge;
                     }
-                    //аналогично для красного космонавта
                     if (i == pointerId2) {
                         player2.x = (int) event.getX(event.findPointerIndex(pointerId2)) - playerWidth / 2;
                         player2.y = (int) event.getY(event.findPointerIndex(pointerId2)) - playerHeight / 2;
@@ -126,14 +119,14 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                     break;
                 }
 
-                case MotionEvent.ACTION_UP: {//для всех прерванных касаний экрана...
+                case MotionEvent.ACTION_UP: {
                 }
-                case MotionEvent.ACTION_POINTER_UP: {//и до последнего
+                case MotionEvent.ACTION_POINTER_UP: {
 
-                    if (event.getPointerId(event.getActionIndex()) == pointerId1) {//если с экрана убран палец, управляющий белым космонавтом, сбрасываем переменную индекса касания
+                    if (event.getPointerId(event.getActionIndex()) == pointerId1) {
                         pointerId1 = -1;
                     }
-                    if (event.getPointerId(event.getActionIndex()) == pointerId2) {//если с экрана убран палец, управляющий белым космонавтом, сбрасываем переменную индекса касания
+                    if (event.getPointerId(event.getActionIndex()) == pointerId2) {
                         pointerId2 = -1;
                     }
                     break;
@@ -144,7 +137,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public boolean pointerIsOnPlayer(int i, MotionEvent event, CharacterSprite player){
-        if (event.getY(i) < player.y + playerHeight && event.getY(i) > player.y && event.getX(i) < player.x + playerWidth && event.getX(i) > player.x)//если координаты касания находятся внутри текущих координат спрайта игрока, то true
+        if (event.getY(i) < player.y + playerHeight && event.getY(i) > player.y && event.getX(i) < player.x + playerWidth && event.getX(i) > player.x)
             return  true;
         else return  false;
     }
@@ -167,15 +160,15 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     public void draw(Canvas canvas) {
         super.draw(canvas);
         if (canvas != null) {
-            canvas.drawColor(Color.rgb(20, 0, 40));//фон
+            canvas.drawColor(Color.rgb(20, 0, 40));
 
             Paint paint = new Paint();
             paint.setColor(Color.WHITE);
 
             for (int i = 0; i < 100; i++) {
-                canvas.drawCircle(x[i], y[i], 2, paint);//звёзды
+                canvas.drawCircle(x[i], y[i], 2, paint);
             }
-            //рисование разметки, вывод текста
+
             paint.setStrokeWidth(10f);
             paint.setMaskFilter(new BlurMaskFilter(10, BlurMaskFilter.Blur.NORMAL));
             canvas.drawCircle(screenWidth / 2, screenHeight / 2, 120, paint);
@@ -196,7 +189,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             canvas.drawText("GOALS", 30, screenHeight - 40, paint);
             canvas.drawText(String.valueOf(goal1), screenWidth - 125, 120, paint);
             canvas.drawText(String.valueOf(goal2), 95, screenHeight - 100, paint);
-            //отображение спрайтов
+
             player1.draw(canvas);
             player2.draw(canvas);
             asteroid.draw(canvas);
@@ -205,11 +198,15 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
 public boolean isCollision(CharacterSprite asteroid, CharacterSprite hero) {
 
-        if (hero.x < asteroid.x + asteroid.image.getWidth() &&
+    if (hero.x < asteroid.x + asteroid.image.getWidth() &&
             hero.x + hero.image.getWidth() > asteroid.x &&
             hero.y < asteroid.y + asteroid.image.getHeight() &&
-            hero.y + hero.image.getHeight() > asteroid.y) {//если координаты астероида пересекаются с координатами игрока, то произошло его столкновение с игроком
-        xVelocity = xVelocity * -1;//меняем направление вектора скорости астероида
+            hero.y + hero.image.getHeight() > asteroid.y) {
+        if (xVelocity == 0 && yVelocity == 0) {
+            xVelocity = (asteroid.x + asteroidWidth / 2 - (hero.x + playerWidth / 2));
+            yVelocity = (asteroid.y + asteroidHeight / 2 - (hero.y + playerHeight / 2));
+        }
+        xVelocity = xVelocity * -1;
         yVelocity = yVelocity * -1;
         return true;
     } else return false;
@@ -217,59 +214,87 @@ public boolean isCollision(CharacterSprite asteroid, CharacterSprite hero) {
 
     public void update() {
 
-    //новые координаты астероида
-        asteroid.x = asteroid.x + xVelocity/10;
-        asteroid.y = asteroid.y + yVelocity/10;
+        asteroid.x = asteroid.x + xVelocity/5;
+        asteroid.y = asteroid.y + yVelocity/5;
 
         if (isCollision(asteroid, player1) ) {
 
-            xVelocity = asteroid.x - player1.x ;//вычисление длины вектора скорости астероида
-            yVelocity = asteroid.y - player1.y ;
+//            if (asteroid.x+asteroidWidth/2 > player1.x+playerWidth/2) n_x = player1.x;
+//            if (asteroid.x + asteroidWidth/2 < player1.x + playerWidth/2)
+//                n_x = player1.x + playerWidth;
+//            if (asteroid.y+asteroidHeight/2 > player1.y+playerHeight/2) n_x = player1.y;
+//            if (asteroid.y + asteroidHeight/2 < player1.y + playerHeight/2)
+//                n_y = player1.y + playerHeight;
+//            double hyp = Math.hypot((double) (n_x - asteroidWidth), (double) (n_y - asteroidHeight));
+//            double sinNA = n_x - asteroidWidth / hyp;
+//            double cosNA = n_y - asteroidHeight / hyp;
+//            double nSpeed = xVelocity * cosNA - yVelocity * sinNA;
+//            double tSpeed = xVelocity * sinNA + yVelocity * cosNA;
+//            nSpeed = -nSpeed;
+//            xVelocity = (int) (tSpeed * sinNA + nSpeed * cosNA);
+//            yVelocity = (int) (tSpeed * cosNA - nSpeed * sinNA);
+            xVelocity = asteroid.x + asteroidWidth / 2 - (player1.x + playerWidth / 2);
+            yVelocity = asteroid.y + asteroidHeight / 2 - (player1.y + playerHeight / 2);
         }
 
-        if (isCollision(asteroid, player2)){
-            xVelocity = asteroid.x - player2.x ;//вычисление длины вектора скорости астероида
-            yVelocity = asteroid.y - player2.y ;
+        if (isCollision(asteroid, player2)) {
+//            if (asteroid.x+asteroidWidth/2 < player2.x+playerWidth/2) n_x = player2.x;
+//            if (asteroid.x + asteroidWidth/2 > player2.x + playerWidth/2)
+//                n_x = player2.x + playerWidth;
+//            if (asteroid.y+asteroidHeight/2 > player2.y+playerHeight/2) n_x = player2.y;
+//            if (asteroid.y + asteroidHeight/2 < player2.y + playerHeight/2)
+//                n_y = player2.y + playerHeight;
+//            double hyp = Math.hypot((double) (n_x - asteroidWidth), (double) (n_y - asteroidHeight));
+//            double sinNA = n_x - asteroidWidth / hyp;
+//            double cosNA = n_y - asteroidHeight / hyp;
+//            double nSpeed = xVelocity * cosNA - yVelocity * sinNA;
+//            double tSpeed = xVelocity * sinNA + yVelocity * cosNA;
+//            nSpeed = -nSpeed;
+//            xVelocity = (int) (tSpeed * sinNA + nSpeed * cosNA);
+//            yVelocity = (int) (tSpeed * cosNA - nSpeed * sinNA);
+
+            xVelocity = asteroid.x + asteroidWidth / 2 - (player2.x + playerWidth / 2);
+            yVelocity = asteroid.y + asteroidHeight / 2 - (player2.y + playerHeight / 2);
         }
 
-        if (asteroid.x > screenWidth - asteroidWidth - edge || asteroid.x < edge) {//если астероид ударился об длинную сторону экарана, он меняет своё направление
+        if (asteroid.x > screenWidth - asteroidWidth - edge || asteroid.x < edge) {
             xVelocity = xVelocity * -1;
         }
 
         if ((asteroid.y > screenHeight - asteroidHeight - edge || asteroid.y < edge) && (asteroid.x  < screenWidth / 2 - 150 || asteroid.x + asteroidWidth > screenWidth / 2 + 150)) {
-        //если астероид ударился о бортик по одну из сторон от ворот, он меняет своё направление
             yVelocity = yVelocity * -1;
         }
 
-        if (asteroid.y > screenHeight - asteroidHeight){//если астероид вылетел за пределы экрана через нижние ворота
+        if (asteroid.y > screenHeight - asteroidHeight){
             b_goal2 = true;
         }
 
-        if (asteroid.y < 0) {//если астероид вылетел за пределы экрана через верхние ворота
+        if (asteroid.y < 0) {
             b_goal1 = true;
         }
 
-        if (b_goal1 || b_goal2) {//если гол
-            player1.x = screenWidth / 2 - player1.image.getWidth() / 2;//оба игрока возвращаются на свои исходные позиции
+        if (b_goal1 || b_goal2) {
+            player1.x = screenWidth / 2 - player1.image.getWidth() / 2;
             player1.y = 150;
             player2.x = screenWidth / 2 - player2.image.getWidth() / 2;
             player2.y = screenHeight - player2.image.getHeight() - 150;
-            asteroid.x = screenWidth / 2 - asteroidWidth / 2;//астероид возвращается в центр экрана
+            asteroid.x = screenWidth / 2 - asteroidWidth / 2;
             asteroid.y = screenHeight / 2 - asteroidHeight / 2;
-            xVelocity = 0;//астероид не движется, пока не получит импульс от столкновения
+            xVelocity = 0;
             yVelocity = 0;
-            pointerId1 = -1;//если пальцы ещё на экране, касания с этими индексами больше не контролируют игроков
+            pointerId1 = -1;
             pointerId2 = -1;
         }
 
         if (b_goal1) {
-            goal2++;//если гол в верхние ворота, игроку 2 + 1 очко
+            goal2++;
             b_goal1 = false;
         }
 
         if (b_goal2) {
-            goal1++;//если гол в нижние ворота, игроку 1 + 1 очко
+            goal1++;
             b_goal2 = false;
         }
     }
 }
+
